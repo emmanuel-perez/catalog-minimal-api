@@ -4,18 +4,19 @@ using MinimalCatalogApi.Contracts;
 using MinimalCatalogApi.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 var app = builder.Build();
 
-var productsRepository = new ProductRepository(connectionString!);
+// var productsRepository = new ProductRepository(connectionString!);
 
 app.MapGet("/", () => "Hello World!");
 
 //  PRODUCT ENDPOINTS
 
-app.MapGet("/products", async () =>
+app.MapGet("/products", async (IProductRepository productsRepository) =>
 {
     try
     {
@@ -28,7 +29,7 @@ app.MapGet("/products", async () =>
     }
 });
 
-app.MapGet("/products/{id}", async (int id) =>
+app.MapGet("/products/{id}", async (int id, IProductRepository productsRepository) =>
 {   
     try
     {
@@ -41,7 +42,7 @@ app.MapGet("/products/{id}", async (int id) =>
     }
 });
 
-app.MapPost("/products", async (UpsertProductDto productToCreate) => {
+app.MapPost("/products", async (UpsertProductDto productToCreate, IProductRepository productsRepository) => {
     var productCreated = await productsRepository.CreateProduct(productToCreate);
     if (productCreated) {
         return Results.Ok("Product has been created successfully");
@@ -50,7 +51,7 @@ app.MapPost("/products", async (UpsertProductDto productToCreate) => {
     }
 });
 
-app.MapPut("/products/{id}", async (int productId, UpsertProductDto productToCreate) => {
+app.MapPut("/products/{id}", async (int productId, UpsertProductDto productToCreate, IProductRepository productsRepository) => {
     var productCreated = await productsRepository.UpdateProductById(productId, productToCreate);
     if (productCreated) {
         return Results.Ok("Product has been updated successfully");
@@ -59,7 +60,7 @@ app.MapPut("/products/{id}", async (int productId, UpsertProductDto productToCre
     }
 });
 
-app.MapDelete("/products/{id}", async (int productId) => {
+app.MapDelete("/products/{id}", async (int productId, IProductRepository productsRepository) => {
     var productCreated = await productsRepository.DeactivateProductById(productId);
     if (productCreated) {
         return Results.Ok("Product has been deactivated successfully");

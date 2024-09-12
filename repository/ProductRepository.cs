@@ -9,12 +9,12 @@ namespace MinimalCatalogApi.Repositories {
         
         private readonly string _connectionString;
 
-        public ProductRepository (string connectionString){
-            _connectionString = connectionString;
+        public ProductRepository (IConfiguration configuration){
+            _connectionString = configuration.GetConnectionString("DefaultConnection")!;
         } 
 
         public async Task<IEnumerable<Product>>GetProducts(){
-            string query = "SELECT * FROM PRODUCTS";
+            string query = "SELECT * FROM CatalogSchema.Products;";
             using (var connection = new SqlConnection(_connectionString)){
                 try
                 {
@@ -29,7 +29,7 @@ namespace MinimalCatalogApi.Repositories {
 
         public async Task<Product>GetProductById(int productId){
             string query = @"
-                SELECT * FROM CatalogShema.Products
+                SELECT * FROM CatalogSchema.Products
                 WHERE product_id = @Id
             ";
             using (var connection = new SqlConnection(_connectionString)){
@@ -52,7 +52,7 @@ namespace MinimalCatalogApi.Repositories {
                 ) VALUES(
                     @ProductName,
                     @ProductPrice
-                )
+                );
             ";
             using (var connection = new SqlConnection(_connectionString)){
                 try
